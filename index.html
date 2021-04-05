@@ -85,7 +85,7 @@ th, td {
   </tr>
 </table>
 <h3 id="who-is-making-50k-">Who is making &gt;50K?</h3>
-<p>The average age of anyone earning  &gt;50K is found.</p>
+<!-- <p>The average age of anyone earning  &gt;50K is found.</p>
 <pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CEIL</span>(<span class="hljs-keyword">AVG</span>(age)) <span class="hljs-keyword">as</span> AverageAge
 <span class="hljs-keyword">FROM</span> income
 <span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>;
@@ -98,8 +98,8 @@ th, td {
   <tr>
     <td>45</td>
   </tr>
-</table>
-<p>Now, this average is broken up by race...</p>
+</table> -->
+<p>Average age of anyone earning &gt;50K broken up by race...</p>
 <pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> race, <span class="hljs-keyword">CEIL</span>(<span class="hljs-keyword">AVG</span>(age)) <span class="hljs-keyword">as</span> AverageAge
 <span class="hljs-keyword">FROM</span> income
 <span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>
@@ -153,7 +153,7 @@ th, td {
     <td>45</td>
   </tr>
 </table>
-<p>Next, I looked at hours worked per week. I found the average number of hours worked per week by those earning &gt;50k. I then found the average number of hours worked per week, by those earning &gt;50k and working less than that average. I broke this query up by marital status.</p>
+<p>Using a subquery, I found the average hours worked per week by those earning &gt;50K. Using that average, I found the number of hours worked per week by those earning &gt;50k and working less than that average. I broke this query up by average per marital status.</p>
 <pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> maritalstatus, <span class="hljs-keyword">CEIL</span>(<span class="hljs-keyword">AVG</span>(incom.hoursperweek)) <span class="hljs-keyword">AS</span> AverageHours
 <span class="hljs-keyword">FROM</span> income <span class="hljs-keyword">AS</span> incom
 <span class="hljs-keyword">WHERE</span> incom.incomebool = <span class="hljs-string">'&gt;50K'</span> <span class="hljs-keyword">AND</span> incom.hoursperweek &lt; (
@@ -199,6 +199,136 @@ th, td {
   </tr>
 </table>
 
+<p>Using a window function, I found the average hours per week based on country level. I used this average to find those who work the least compared to their country, and still earn &gt;50K. Those in the ? workclass tended to work the least amount of hours and still make &gt50K.</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> age, race,workclass,gender,nativecountry,hoursperweek,education,maritalstatus, 
+<span class="hljs-keyword">ROUND</span>((hoursperweek/<span class="hljs-keyword">AVG</span>(hoursperweek) <span class="hljs-keyword">Over</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> nativecountry)),<span class="hljs-number">2</span>) <span class="hljs-keyword">AS</span> hoursPercentage
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> hoursPercentage <span class="hljs-keyword">ASC</span>
+<span class="hljs-keyword">LIMIT</span> <span class="hljs-number">10</span>;
+</code></pre>
+<table class="table table-bordered table-hover table-condensed">
+<thead><tr><th title="Field #1">age</th>
+<th title="Field #2">race</th>
+<th title="Field #3">workclass</th>
+<th title="Field #4">gender</th>
+<th title="Field #5">nativecountry</th>
+<th title="Field #6">hoursperweek</th>
+<th title="Field #7">education</th>
+<th title="Field #8">maritalstatus</th>
+<th title="Field #9">hourspercentage</th>
+</tr></thead>
+<tbody><tr>
+<td align="right">62</td>
+<td>White</td>
+<td>Private</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">1</td>
+<td>Bachelors</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.02</td>
+</tr>
+<tr>
+<td align="right">58</td>
+<td>White</td>
+<td>State-gov</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">1</td>
+<td>Doctorate</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.02</td>
+</tr>
+<tr>
+<td align="right">65</td>
+<td>White</td>
+<td>?</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">1</td>
+<td>HS-grad</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.02</td>
+</tr>
+<tr>
+<td align="right">32</td>
+<td>White</td>
+<td>?</td>
+<td>Female</td>
+<td>United-States</td>
+<td align="right">2</td>
+<td>HS-grad</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.04</td>
+</tr>
+<tr>
+<td align="right">81</td>
+<td>White</td>
+<td>Private</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">2</td>
+<td>Prof-school</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.04</td>
+</tr>
+<tr>
+<td align="right">67</td>
+<td>White</td>
+<td>?</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">2</td>
+<td>HS-grad</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.04</td>
+</tr>
+<tr>
+<td align="right">66</td>
+<td>White</td>
+<td>?</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">2</td>
+<td>11th</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.04</td>
+</tr>
+<tr>
+<td align="right">61</td>
+<td>White</td>
+<td>?</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">2</td>
+<td>Assoc-acdm</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.04</td>
+</tr>
+<tr>
+<td align="right">70</td>
+<td>White</td>
+<td>?</td>
+<td>Male</td>
+<td>United-States</td>
+<td align="right">2</td>
+<td>Doctorate</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.04</td>
+</tr>
+<tr>
+<td align="right">79</td>
+<td>White</td>
+<td>?</td>
+<td>Female</td>
+<td>United-States</td>
+<td align="right">2</td>
+<td>Assoc-acdm</td>
+<td>Married-civ-spouse</td>
+<td align="right">0.04</td>
+</tr>
+</tbody></table>
 <h3 id="interesting-individuals-">Interesting Individuals:</h3>
 <p>This is the youngest person earning &gt;50K.</p>
 <pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> age, race, gender, hoursperweek, nativecountry
@@ -256,6 +386,7 @@ th, td {
     <td>Widowed</td>
   </tr>
 </table>
+
 <h3> Visualization of this income dataset using Tableau</h3>
 <p>Demographics break down:</p>
 <img src="img/table.png" style="width:700px" alt="Table showing breakdown">
