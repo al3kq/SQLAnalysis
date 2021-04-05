@@ -1,0 +1,258 @@
+<h1 id="sql-analysis-of-a-dataset">SQL Analysis of a Dataset</h1>
+<p>Below I use PostgreSQL to learn more about this income dataset.</p>
+<p>This first query shows the total count of individuals earning over 50K and individuals earning less and 50K.</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> incomebool, <span class="hljs-keyword">COUNT</span>(incomebool)
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> incomebool;
+</code></pre>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 5px;
+  text-align: left;    
+}
+</style>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>incomebool</th>
+    <th>count</th> 
+  </tr>
+  <tr>
+    <td>&#62;50k</td>
+    <td>11687</td>
+  </tr>
+  <tr>
+    <td>&#60;=50K</td>
+    <td>37155</td>
+  </tr>
+</table>
+<h3 id="demographic-breakdowns-">Demographic Breakdowns:</h3>
+<p>Queries to understand the demographics of the whole dataset.</p>
+<h4 id="race-">Race:</h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> race, <span class="hljs-keyword">COUNT</span>(race)
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> race;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>race</th>
+    <th>count</th> 
+  </tr>
+  <tr>
+    <td>Black</td>
+    <td>4685</td>
+  </tr>
+  <tr>
+    <td>Asian-Pac-Islander</td>
+    <td>1519</td>
+  </tr>
+  <tr>
+    <td>Amer-Indian-Eskimo</td>
+    <td>470</td>
+  </tr>
+  <tr>
+    <td>Other</td>
+    <td>406</td>
+  </tr>
+  <tr>
+    <td>White</td>
+    <td>41762</td>
+  </tr>
+</table>
+<h4 id="gender-">Gender:</h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> gender, <span class="hljs-keyword">COUNT</span>(gender)
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> gender;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>gender</th>
+    <th>count</th> 
+  </tr>
+  <tr>
+    <td>Female</td>
+    <td>16192</td>
+  </tr>
+  <tr>
+    <td>Male</td>
+    <td>32650</td>
+  </tr>
+</table>
+<h3 id="who-is-making-50k-">Who is making &gt;50K?</h3>
+<p>The average age of anyone earning  &gt;50K is found.</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CEIL</span>(<span class="hljs-keyword">AVG</span>(age)) <span class="hljs-keyword">as</span> AverageAge
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>averageage</th>
+  </tr>
+  <tr>
+    <td>45</td>
+  </tr>
+</table>
+<p>Now, this average is broken up by race...</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> race, <span class="hljs-keyword">CEIL</span>(<span class="hljs-keyword">AVG</span>(age)) <span class="hljs-keyword">as</span> AverageAge
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> race;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>race</th>
+    <th>averageage</th> 
+  </tr>
+  <tr>
+    <td>Black</td>
+    <td>45</td>
+  </tr>
+  <tr>
+    <td>Asian-Pac-Islander</td>
+    <td>43</td>
+  </tr>
+  <tr>
+    <td>Amer-Indian-Eskimo</td>
+    <td>41</td>
+  </tr>
+  <tr>
+    <td>Other</td>
+    <td>41</td>
+  </tr>
+  <tr>
+    <td>White</td>
+    <td>45</td>
+  </tr>
+</table>
+<p>and gender.</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> gender, <span class="hljs-keyword">CEIL</span>(<span class="hljs-keyword">AVG</span>(age)) <span class="hljs-keyword">as</span> AverageAge
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> gender;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>gender</th>
+    <th>averageage</th> 
+  </tr>
+  <tr>
+    <td>Female</td>
+    <td>43</td>
+  </tr>
+  <tr>
+    <td>Male</td>
+    <td>45</td>
+  </tr>
+</table>
+<p>Next, I looked at hours worked per week. I found the average number of hours worked per week by those earning &gt;50k. I then found the average number of hours worked per week, by those earning &gt;50k and working less than that average. I broke this query up by marital status.</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> maritalstatus, <span class="hljs-keyword">CEIL</span>(<span class="hljs-keyword">AVG</span>(incom.hoursperweek)) <span class="hljs-keyword">AS</span> AverageHours
+<span class="hljs-keyword">FROM</span> income <span class="hljs-keyword">AS</span> incom
+<span class="hljs-keyword">WHERE</span> incom.incomebool = <span class="hljs-string">'&gt;50K'</span> <span class="hljs-keyword">AND</span> incom.hoursperweek &lt; (
+    <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">AVG</span>(inc.hoursperweek)
+    <span class="hljs-keyword">FROM</span> income <span class="hljs-keyword">as</span> inc
+    <span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>)
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> maritalstatus
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> AverageHours <span class="hljs-keyword">DESC</span>;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>maritalstatus</th>
+    <th>averagehours</th> 
+  </tr>
+  <tr>
+    <td>Seperated</td>
+    <td>41</td>
+  </tr>
+  <tr>
+    <td>Married-AF-spouse</td>
+    <td>41</td>
+  </tr>
+  <tr>
+    <td>Divorced</td>
+    <td>40</td>
+  </tr>
+  <tr>
+    <td>Never-married</td>
+    <td>40</td>
+  </tr>
+  <tr>
+    <td>Married-civ-spouse</td>
+    <td>39</td>
+  </tr>
+  <tr>
+    <td>Widowed</td>
+    <td>37</td>
+  </tr>
+  <tr>
+    <td>Married-spouse-absent</td>
+    <td>36</td>
+  </tr>
+</table>
+
+<h3 id="interesting-individuals-">Interesting Individuals:</h3>
+<p>This is the youngest person earning &gt;50K.</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> age, race, gender, hoursperweek, nativecountry
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&gt;50K'</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> age <span class="hljs-keyword">ASC</span>
+<span class="hljs-keyword">LIMIT</span> <span class="hljs-number">1</span>;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>age</th>
+    <th>race</th> 
+    <th>gender</th>
+    <th>nativecountry</th> 
+    <th>hoursperweek</th>
+    <th>education</th>
+    <th>maritalstatus</th>
+  </tr>
+  <tr>
+    <td>19</td>
+    <td>White</td>
+    <td>Female</td>
+    <td>United-States</td>
+    <td>20</td>
+    <td>Some-college</td>
+    <td>Never-married</td>
+  </tr>
+</table>
+<p>This is the oldest person earning &lt;=50K.</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> age, race, gender, nativecountry, hoursperweek, education, maritalstatus
+<span class="hljs-keyword">FROM</span> income
+<span class="hljs-keyword">WHERE</span> incomebool = <span class="hljs-string">'&lt;=50K'</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> age <span class="hljs-keyword">DESC</span>
+<span class="hljs-keyword">LIMIT</span> <span class="hljs-number">1</span>;
+</code></pre>
+<p>Query Result:</p>
+<table style="width:100%">
+  <tr>
+    <th>age</th>
+    <th>race</th> 
+    <th>gender</th>
+    <th>nativecountry</th> 
+    <th>hoursperweek</th>
+    <th>education</th>
+    <th>maritalstatus</th>
+  </tr>
+  <tr>
+    <td>90</td>
+    <td>White</td>
+    <td>Male</td>
+    <td>United-States</td>
+    <td>60</td>
+    <td>Prof-school</td>
+    <td>Widowed</td>
+  </tr>
+</table>
